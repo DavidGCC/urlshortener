@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require("mongoose");
 const urlParse = require("url-parse");
-const validateUrl = require("url-validate");
 const shortid = require("shortid");
 const dns = require("dns");
 const Url = require("./models/Url");
@@ -41,13 +40,24 @@ app.post("/api/shorturl", async (req, res) => {
     const parsedUrl = new urlParse(req.body?.url);
     dns.lookup(parsedUrl.toString(), async (err, addr, fam) => {
         if (addr) {
-            const shortenedUrl = `${req.protocol}://${req.get('host')}/api/shorturl/${shortid.generate()}`;
+            const urlInDb = await Url.findOne({ url: parsedUrl.toString() });
+            if (urlInDb) {
+                res.send(`${urlInDb.url} --- ${urlInDb.shortenedHost}/api/shorturl/${urlInDb.shortenedHash}`);
+                return;
+            }
+            const shortenedHost = `${req.protocol}://${req.get('host')}`;
+            const shortenedHash = shortid.generate();
             const newUrl = new Url({
-                shortenedUrl,
+                shortenedHost,
+                shortenedHash,
                 url: parsedUrl.toString()
             });
-            const response = await newUrl.save({});
-            res.send(`${response.url} --- ${shortenedUrl}`);
+            try {
+                const response = await newUrl.save({});
+                res.send(`${response.url} --- ${response.shortenedHost}/api/shorturl/${response.shortenedHash}`);
+            } catch (err) {
+                res.send(err);
+            }
         } else {
             res.json({
                 error: "Invalid Url"

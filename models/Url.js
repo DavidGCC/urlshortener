@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 require("mongoose-type-url");
 
 const UrlSchema = new mongoose.Schema({
-    shortenedUrl: mongoose.SchemaTypes.Url,
+    shortenedHost: mongoose.SchemaTypes.Url,
     url: mongoose.SchemaTypes.Url,
+    shortenedHash: { type: String, unique: true }
 });
+
+UrlSchema.plugin(uniqueValidator);
 
 UrlSchema.set("toJSON", {
     transform: (doc, returned) => {

@@ -13,9 +13,9 @@
     "express": "^4.17.1",
     "mongoose": "^5.12.5",
     "mongoose-type-url": "^2.1.0",
+    "mongoose-unique-validator": "^2.0.3",
     "shortid": "^2.2.16",
-    "url-parse": "^1.5.1",
-    "url-validate": "^1.0.1"
+    "url-parse": "^1.5.1"
   },
   "license": "MIT",
   "devDependencies": {
