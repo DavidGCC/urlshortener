@@ -43,7 +43,10 @@ app.post("/api/shorturl", async (req, res) => {
         if (addr) {
             const urlInDb = await Url.findOne({ url: parsedUrl.toString() });
             if (urlInDb) {
-                res.send(`${urlInDb.url} --- ${shortenedHost}/api/shorturl/${urlInDb.shortenedHash}`);
+                res.json({
+                    original_url: urlInDb.url,
+                    short_url: urlInDb.shortenedHash
+                });  
                 return;
             }
             const shortenedHash = shortid.generate();
@@ -53,7 +56,10 @@ app.post("/api/shorturl", async (req, res) => {
             });
             try {
                 const response = await newUrl.save({});
-                res.send(`${response.url} --- ${shortenedHost}/api/shorturl/${response.shortenedHash}`);
+                res.json({
+                    original_url: response.url,
+                    short_url: response.shortenedHash
+                });
             } catch (err) {
                 res.send(err);
             }
