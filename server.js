@@ -39,7 +39,7 @@ app.get('/api/hello', function(req, res) {
 app.post("/api/shorturl", async (req, res) => {
     const parsedUrl = new urlParse(req.body?.url);
     const shortenedHost = `${req.protocol}://${req.get('host')}`;
-    dns.lookup(parsedUrl.toString(), async (err, addr, fam) => {
+    dns.lookup(parsedUrl.host, async (err, addr, fam) => {
         if (addr) {
             const urlInDb = await Url.findOne({ url: parsedUrl.toString() });
             if (urlInDb) {
