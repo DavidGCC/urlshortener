@@ -38,23 +38,22 @@ app.get('/api/hello', function(req, res) {
 
 app.post("/api/shorturl", async (req, res) => {
     const parsedUrl = new urlParse(req.body?.url);
+    const shortenedHost = `${req.protocol}://${req.get('host')}`;
     dns.lookup(parsedUrl.toString(), async (err, addr, fam) => {
         if (addr) {
             const urlInDb = await Url.findOne({ url: parsedUrl.toString() });
             if (urlInDb) {
-                res.send(`${urlInDb.url} --- ${urlInDb.shortenedHost}/api/shorturl/${urlInDb.shortenedHash}`);
+                res.send(`${urlInDb.url} --- ${shortenedHost}/api/shorturl/${urlInDb.shortenedHash}`);
                 return;
             }
-            const shortenedHost = `${req.protocol}://${req.get('host')}`;
             const shortenedHash = shortid.generate();
             const newUrl = new Url({
-                shortenedHost,
                 shortenedHash,
                 url: parsedUrl.toString()
             });
             try {
                 const response = await newUrl.save({});
-                res.send(`${response.url} --- ${response.shortenedHost}/api/shorturl/${response.shortenedHash}`);
+                res.send(`${response.url} --- ${shortenedHost}/api/shorturl/${response.shortenedHash}`);
             } catch (err) {
                 res.send(err);
             }
@@ -64,6 +63,24 @@ app.post("/api/shorturl", async (req, res) => {
             })
         }
     })
+});
+
+app.get("/api/shorturl/:hash", async (req, res) => {
+    const hash = req.params.hash;
+    try {
+        const foundUrl = await Url.findOne({ shortenedHash: hash });
+        if (foundUrl) {
+            res.status(301).redirect(foundUrl.url);
+        } else {
+            res.json({
+                error: "Unknown Shortened Url"
+            })
+        }
+    } catch (error) {
+        res.json({
+            error
+        });
+    }
 });
 
 app.listen(port, function() {

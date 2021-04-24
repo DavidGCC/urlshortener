@@ -3,7 +3,6 @@ const uniqueValidator = require("mongoose-unique-validator");
 require("mongoose-type-url");
 
 const UrlSchema = new mongoose.Schema({
-    shortenedHost: mongoose.SchemaTypes.Url,
     url: mongoose.SchemaTypes.Url,
     shortenedHash: { type: String, unique: true }
 });
